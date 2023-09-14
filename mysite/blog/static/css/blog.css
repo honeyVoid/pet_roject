@@ -90,3 +90,12 @@ input[type=submit] {
     font-size:12px;
     color:#666;
 }
+
+.post {
+    max-width: 600px; /* Установите желаемую максимальную ширину */
+    margin: 0 auto; /* Выравнивание по центру */
+}
+
+.post-body {
+    /* Стилизация текста внутри .post-body */
+}

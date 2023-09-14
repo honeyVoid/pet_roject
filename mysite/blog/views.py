@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
+from django.core.mail import send_mail
+from django.views.decorators.http import require_POST
 
-from blog.models import Post
-from blog.forms import EmailPostForm
+from blog.models import Post, Comment
+from blog.forms import EmailPostForm, ComentForm
 
 
 # def post_list(request):
@@ -26,7 +28,7 @@ from blog.forms import EmailPostForm
 class PostListView(ListView):
     queryset = Post.published.all()
     context_object_name = 'posts'
-    paginate_by = 3
+    paginate_by = 10
     template_name = 'blog/post/list.html'
 
 
@@ -39,11 +41,16 @@ def post_detail(request, year, month, day, post):
         publish__month=month,
         publish__day=day
     )
-
+    comments = post.comments.filter(active=True)
+    form = ComentForm()
     return render(
         request,
         'blog/post/detail.html',
-        {'post': post}
+        {
+            'post': post,
+            'comments': comments,
+            'form': form
+        }
     )
 
 
@@ -54,20 +61,24 @@ def post_share(request, post_id):
         status=Post.Status.PUBLISHED
     )
 
+    sent = False
+    to = None
+
     if request.method == 'POST':
         form = EmailPostForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-
-        # errors = form.errors
-        # return render(
-        #     request,
-        #     'blog/post/share.html',
-        #     {
-        #         'error': errors
-        #     }
-
-        # )
+            post_url = request.build_absolute_uri(post.get_absolute_url())
+            subject = f'{cd["name"]} порекомендовал вам прочесть {post.title}'
+            message = f'прочти {post.title}, вот ссылка: {post_url}'
+            send_mail(
+                subject,
+                message,
+                'evgenishonov@gmail.com',
+                [cd['to']]
+            )
+            to = cd['to']
+            sent = True
 
     form = EmailPostForm()
 
@@ -76,6 +87,36 @@ def post_share(request, post_id):
         'blog/post/share.html',
         {
             'post': post,
-            'form': form
+            'form': form,
+            'sent': sent,
+            'to': to
+        }
+    )
+
+
+@require_POST
+def post_comment(request, post_id):
+    post = get_object_or_404(
+        Post,
+        id=post_id,
+        status=Post.Status.PUBLISHED
+    )
+    comment = None
+
+    form = ComentForm(data=request.POST)
+
+    if form.is_valid():
+
+        comment = form.save(commit=False)
+
+        comment.post = post
+
+        comment.save()
+    return render(
+        request, 'blog/post/comment.html',
+        {
+            'post': post,
+            'form': form,
+            'comment': comment
         }
     )
