@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "blog.apps.BlogConfig",
+    "taggit",
 ]
 
 MIDDLEWARE = [
@@ -82,11 +83,11 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':os.getenv('NAME'),
-        'USER':os.getenv('USER'),
-        'PASSWORD':os.getenv('PASSWORD'),
-        'HOST':os.getenv('HOST'),
-        'PORT':os.getenv('PORT'),
+        'NAME': os.getenv('NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'),
+        'PORT': os.getenv('PORT'),
     }
 }
 
@@ -126,8 +127,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-EMAIL_HOST = os.getenv('EMAIL_HOST') 
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER') 
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') 
-EMAIL_PORT = os.getenv('EMAIL_PORT') 
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') 
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')

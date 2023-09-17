@@ -2,28 +2,41 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from blog.models import Post, Comment
+from taggit.models import Tag
+
+from blog.models import Post
 from blog.forms import EmailPostForm, ComentForm
 
 
-# def post_list(request):
-#     posts_list = Post.published.all()
-#     paginator = Paginator(posts_list, 3)
-#     page_number = request.GET.get('page', 1)
+def post_list(request, tag_slug=None):
+    posts_list = Post.published.all()
 
-#     try:
-#         posts = paginator.page(page_number)
-#     except EmptyPage:
-#         posts = paginator.page(paginator.num_pages)
-#     except PageNotAnInteger:
-#         posts = paginator.page(1)
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        posts_list = posts_list.filter(tags__in=[tag])
 
-#     return render(
-#         request,
-#         'blog/post/list.html',
-#         {'posts': posts}
-#     )
+    paginator = Paginator(posts_list, 3)
+    page_number = request.GET.get('page', 1)
+
+    try:
+        posts = paginator.page(page_number)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+
+    return render(
+        request,
+        'blog/post/list.html',
+        {
+            'posts': posts,
+            'tag': tag
+        }
+    )
+
 
 class PostListView(ListView):
     queryset = Post.published.all()
